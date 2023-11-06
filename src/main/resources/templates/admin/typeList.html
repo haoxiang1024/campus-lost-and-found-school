@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理系统</title>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+</head>
+
+<body>
+<div id="div" style="padding: 20px; height: 100%">
+    <!--    <div><b style="color: #000; font-size: 30px;">学生列表</b></div>-->
+    <div style="display: flex; justify-content: space-between;margin-bottom: 20px; margin-top: 20px;">
+        <el-input style="width: 180px" v-model="searchInfo.typeName" placeholder="请输入分类名称" clearable
+                  @keyup.enter.native="handleQuery">
+        </el-input>
+        <el-button type="primary" @click="handleQuery">搜索</el-button>
+        <el-button type="primary" @click="resetting">重置</el-button>
+        <el-button type="primary" @click="showAddType">+ 新增信息</el-button>
+    </div>
+    <el-table :data="tableData" class="table-box"  :row-class-name="tableRowClassName" @sort-change="changeSort">
+        <el-table-column type="index" label="序号" align="center"></el-table-column>
+        <el-table-column prop="name" label="名称" align="center"></el-table-column>
+        <el-table-column prop="foundCount" label="招领信息数量" sortable='custom' align="center"></el-table-column>
+        <el-table-column prop="lostCount" label="失物信息数量" sortable='custom' align="center"></el-table-column>
+        <el-table-column label="操作" fixed="right" width="200" align="center">
+            <template slot-scope="props">
+                <el-button type="primary" plain @click="showEditUser(props.row)" >编辑</el-button>
+                <el-button type="danger" plain @click="deleteType(props.row)">删除</el-button>
+            </template>
+        </el-table-column>
+    </el-table>
+
+    <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="page"
+                   :page-sizes="[5, 10, 20]" :page-size="pageSize" :total="counts"
+                   layout="total, sizes, prev, pager, next, jumper" style="text-align: right; margin-top: 20px">
+    </el-pagination>
+
+
+    <el-dialog width="40%" title="添加分类信息" :visible.sync="dialogTableVisible4add"  @close='closeDialog'>
+        <el-form :model="formData"  ref="formData" label-width="100px">
+            <el-form-item label="分类名称" prop="name">
+                <el-input v-model="formData.name"></el-input>
+            </el-form-item>
+            <el-form-item align="right">
+                <el-button type="primary" @click="addType()">添加</el-button>
+                <el-button @click="resetForm('formData')">重置</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+
+    <el-dialog width="40%" title="编辑分类信息" :visible.sync="dialogTableVisible4edit">
+        <el-form :model="editFormData" ref="editForm" label-width="100px">
+            <el-form-item label="编号" prop="id">
+                <el-input v-model="editFormData.id" readonly></el-input>
+            </el-form-item>
+            <el-form-item label="名称" prop="name">
+                <el-input v-model="editFormData.name"></el-input>
+            </el-form-item>
+            <el-form-item align="right">
+                <el-button type="primary" @click="updateType()">修改</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+</div>
+
+<div>
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <script src="../js/axios-0.18.0.js"></script>
+    <script>
+        new Vue({
+            el: "#div",
+            data: {
+                dialogTableVisible4add: false,  //添加窗口显示状态
+                dialogTableVisible4edit: false, //编辑窗口显示状态
+                formData: {},//添加表单的数据
+                editFormData: {},//编辑表单的数据
+                typeList:[],//类别信息的集合
+                counts: 0,      //总条数
+                page: 1,        //当前页
+                pageSize: 5,    //每页显示条数
+                tableData: [],//表格数据
+                searchInfo:{
+                    typeName:'',
+                    foundSort:'',
+                    lostSort:''
+                }
+            },
+            created() {
+                //调用分页查询功能
+                this.init();
+            },
+
+            methods: {
+                async init () {
+                    //async异步请求
+                    var data = new URLSearchParams()
+                    data.append('typeName', this.searchInfo.typeName);
+                    data.append('foundSort', this.searchInfo.foundSort);
+                    data.append('lostSort', this.searchInfo.lostSort);
+                    data.append('currentPage', this.page);
+                    data.append('pageSize', this.pageSize);
+                    axios.post("/LostFoundType/getTypeDate",data,{
+                        headers: {
+                            'Content-type':'application/x-www-form-urlencoded'
+                        }
+                    }).then((res)=>{
+                        if(res.data.code == 20041){
+                            //设置表格数据
+                            this.tableData = res.data.data.rows; // {rows:[],totalCount:100}
+                            // console.log(res)
+                            //设置总记录数
+                            this.counts = res.data.data.totalCount;
+                            // this.$message.success("信息获取完成！");
+                        }else if(res.data.code == 20040){
+                            this.$message.error("无信息！");
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    });
+                },
+                //上面使用没有传参数（修改样式的，暂时无用）
+                tableRowClassName({row, rowIndex}) {
+                    if (rowIndex === 0) {
+                        return 'warning-row';
+                    } else if (rowIndex === 1) {
+                        return 'success-row';
+                    }
+                    return '';
+                },
+                closeDialog(){
+                    this.formData= {}//添加表单的数据
+                },
+                // 分页 条件查询
+                handleQuery() {
+                    this.page = 1;
+                    this.init();
+                },
+                showAddType() {
+                    //弹出窗口
+                    this.dialogTableVisible4add = true;
+                },
+                //重置搜索信息的输入框，并且获取所有数据
+                resetting(){
+                    this.searchInfo.typeName=''
+                    this.page = 1;
+                    this.init()
+                },
+                //添加分类功能
+                addType() {
+                    if (this.formData.name == null||this.formData.name === ''){
+                        this.$message.warning("信息输入不能存在空值。");
+                        return
+                    }
+                    axios.post("/LostFoundType/addType",this.formData).then((res)=>{
+                        if(res.data.code == 20011){
+                            this.init()
+                            this.$message.success("添加成功");
+                        }else if(res.data.code == 20010){
+                            this.$message.error("添加失败，该分类信息已存在。");
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    });
+                    // this.init()
+                    this.formData = {};
+                    this.dialogTableVisible4add = false;
+
+                },
+                //改变每页条数时执行的函数
+                handleSizeChange(val) {
+                    //修改分页查询的参数
+                    this.pageSize = val;
+                    //重新执行查询
+                    this.init();
+                },
+                //改变页码时执行的函数
+                handleCurrentChange(val) {
+                    //修改分页查询的参数
+                    this.page = val;
+                    //重新执行查询
+                    this.init();
+                },
+                resetForm(formData) {
+                    //双向绑定，输入的数据都赋值给了formData， 清空formData数据
+                    this.formData = {};
+                    //清除表单的校验数据
+                    this.$refs[formData].resetFields();
+                },
+                showEditUser(row) {
+                    //1. 弹出窗口
+                    this.dialogTableVisible4edit = true;
+                    //2. 显示表单数据---相当于之前的数据回显
+                    this.editFormData = JSON.parse(JSON.stringify(row));
+                },
+                //修改分类信息
+                updateType() {
+                    if (this.editFormData.name === ''){
+                        this.$message.warning("信息输入不能存在空值。");
+                        return
+                    }
+                    // console.log(this.editFormData)
+                    axios.put("/LostFoundType/updateType",this.editFormData).then((res)=>{
+                        // console.log(res.data)
+                        if(res.data.code == 20031){
+                            this.init()
+                            this.$message.success("修改成功");
+                        }else if(res.data.code == 20030){
+                            this.$message.error("修改失败，该分类信息已存在。");
+                        }else{
+                            this.$message.error(res.data.msg);
+                        }
+                    }).catch(err => {
+                        this.$message.error('请求出错了：' + err)
+                    });
+                    // this.init()
+                    this.editFormData = {};
+                    this.dialogTableVisible4edit = false;
+
+                },
+
+                //删除分类信息
+                deleteType(row) {
+                    console.log(row)
+                    if (row.sumCount!==0){
+                        this.$message({
+                            message: '这个分类下面有很多信息的，不可以删除哦',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    this.$confirm('此操作将永久删除该数据， 是否继续', '警告', {
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        type: 'warning'
+                    }).then(() => {
+                        axios.delete("/LostFoundType/deleteType/"+row.id).then((res)=>{
+                            if(res.data.code == 20021){
+                                this.$message.success("删除成功。");
+                            }else{
+                                this.$message.error("删除失败。");
+                            }
+                        }).catch(err => {
+                            this.$message.error('请求出错了：' + err)
+                        }).finally(()=>{
+                            this.init();
+                        });
+                    }).catch(() => {
+                        this.$message({
+                            type: 'info',
+                            message: '已取消删除'
+                        });
+                    })
+
+                },
+                //信息数量排序
+                changeSort (val) {
+                    if (val.order==null){
+                        this.searchInfo.foundSort=''
+                        this.searchInfo.lostSort=''
+                    }else if (val.prop=='foundCount'){
+                        this.searchInfo.foundSort=val.order
+                        this.searchInfo.lostSort=''
+                    }else {
+                        this.searchInfo.foundSort=''
+                        this.searchInfo.lostSort=val.order
+                    }
+                    this.init()
+                }
+            },
+        });
+    </script>
+
+</div>
+</body>
+
+</html>

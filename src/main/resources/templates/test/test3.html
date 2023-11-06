@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理系统</title>
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+    <script src="vue.js"></script>
+    <script src="element-ui/lib/index.js"></script>
+    <script src="js/axios-0.18.0.js"></script>
+
+    <style>
+        .el-header {
+            background-color: #545c64;
+        }
+
+        .header-img {
+            width: 100px;
+            margin-top: 20px;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="div">
+    <div class="top" width="100%" height="100%">
+        <!-- 头部-->
+        <el-header class="el-header">
+            <el-container>
+                <div>
+                    <el-image src="../img/export.png" class="header-img"></el-image>
+                </div>
+                <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal"
+                         background-color="#545c64" text-color="#fff" active-text-color="#ffd04b"
+                         style="margin-left: auto;">
+                    <el-menu-item index="4" >{{userInfo.name}}</el-menu-item>
+                    <el-submenu index="1">
+                        <template slot="title">我的工作台</template>
+                        <el-menu-item index="1-1" @click="userPage">员工</el-menu-item>
+                    </el-submenu>
+                    <el-menu-item index="2" @click="firstPage">首页</a></el-menu-item>
+                    <el-menu-item index="3" @click="logout"><i class="el-icon-switch-button"
+                                                               style="color: #fff"></i></el-menu-item>
+                </el-menu>
+            </el-container>
+        </el-header>
+
+        <!-- 中间部分 -->
+        <el-container>
+            <!-- 侧边栏 -->
+            <div class="left">
+                <el-aside width="200px" style="background-color: rgb(238, 241, 246);">
+                    <el-menu :default-openeds="['1']">
+                        <el-submenu index="1">
+                            <template slot="title"><i class="el-icon-menu"></i>学工部</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="1-1" @click="findAll"><i class="el-icon-help"></i>在校学生管理</el-menu-item>
+                                <el-menu-item index="1-2" @click="upStudent"><i class="el-icon-help" ></i>学生升级/留级</el-menu-item>
+                                <el-menu-item index="1-3" @click="stuWork"><i class="el-icon-help"></i>学生就业情况</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
+
+                        <el-submenu index="2">
+                            <template slot="title"><i class="el-icon-menu"></i>教研部</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="2-1" @click="upStudent"><i class="el-icon-help"></i>已有课程管理</el-menu-item>
+                                <el-menu-item index="2-2" @click="upStudent"><i class="el-icon-help"></i>正在研发课程管理</el-menu-item>
+                                <el-menu-item index="2-3" @click="upStudent"><i class="el-icon-help"></i>新技术课程管理</el-menu-item>
+                            </el-menu-item-group>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+            </div>
+
+            <el-container>
+                <!-- 主区域部分 -->
+                <iframe :src="iframeSrc" frameborder="false"
+                        style="top:80px;left: 120px; width: 100%;height:100%"></iframe>
+            </el-container>
+        </el-container>
+    </div>
+</div>
+<script src="../js/firstPage/index.js">
+
+</script>
+<script>
+    new Vue({
+        el: "#div",
+        data: {
+            activeIndex: '2',
+            iframeSrc: "manager.html",
+            message: '',
+            userInfo: {}
+        },
+        created() {
+            const userInfo = window.localStorage.getItem('userInfo')
+            console.log(userInfo, 'userInfo')
+            if (userInfo) {
+                this.userInfo = JSON.parse(userInfo)
+            }
+        },
+
+        methods: {
+
+            findAll: function () {
+                this.iframeSrc = "stuList.html"
+            },
+            firstPage() {
+                this.iframeSrc = "manager.html"
+
+            },
+            userPage() {
+                this.iframeSrc = "userList.html"
+            },
+            upStudent() {
+                this.iframeSrc = "upStudent.html"
+            },
+            stuWork() {
+                this.iframeSrc = "stuWork.html"
+            },
+            logout() {
+                logoutApi().then(res => {
+                    if (res.data.code === 1) {
+                        localStorage.removeItem('userInfo')
+                        window.location.href = 'login.html'
+                    }
+                })
+            }
+        }
+    });
+</script>
+<style>
+    .left {
+        width: 200px;
+        height: 693px;
+        border-right: 1px solid rgb(230, 230, 230);
+    }
+
+    .el-menu {
+        border: 0 !important;
+    }
+</style>
+</body>
+
+</html>

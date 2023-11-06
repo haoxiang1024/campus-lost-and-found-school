@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.xiaolinzi.lostandfound.mapper.LostFoundTypeMapper">
+
+    <select id="getDate" resultType="com.xiaolinzi.lostandfound.model.LostFoundType">
+        select * from lostfoundtype
+        <where>
+            <if test="typeName != null and typeName != ''">
+                and name like #{typeName}
+            </if>
+        </where>
+        limit #{begin} , #{size};
+    </select>
+    <select id="getDateTotal" resultType="java.lang.Integer">
+        select count(*) from lostfoundtype
+        <where>
+            <if test="typeName != null and typeName != ''">
+                and name like #{typeName}
+            </if>
+        </where>
+    </select>
+    <select id="getTypeDate" resultType="com.xiaolinzi.lostandfound.model.Type">
+        select lostfoundtype.id id,lostfoundtype.name name
+        <choose>
+            <when test="foundSort != null and foundSort != ''">
+                ,count(f.lostfoundtype_id) foundCount
+                from lostfoundtype
+                left join found f on lostfoundtype.id = f.lostfoundtype_id
+            </when>
+            <when test="lostSort != null and lostSort != ''">
+                ,count(l.lostfoundtype_id) lostCount
+                from lostfoundtype
+                left join lost l on lostfoundtype.id = l.lostfoundtype_id
+            </when>
+            <otherwise>
+                from lostfoundtype
+            </otherwise>
+        </choose>
+        <where>
+            <if test="typeName != null and typeName != ''">
+                and lostfoundtype.name like #{typeName}
+            </if>
+        </where>
+        group by lostfoundtype.id
+        <choose>
+            <when test="foundSort == 'ascending'">
+                order by foundCount
+            </when>
+            <when test="foundSort == 'descending'">
+                order by foundCount desc
+            </when>
+            <when test="lostSort == 'ascending'">
+                order by lostCount
+            </when>
+            <when test="lostSort == 'descending'">
+                order by lostCount desc
+            </when>
+            <otherwise>
+                order by lostfoundtype.id
+            </otherwise>
+        </choose>
+        limit #{begin} , #{size};
+    </select>
+    <select id="getFoundCountByID" resultType="java.lang.Integer">
+        select count(*) from found where lostfoundtype_id=#{typeID};
+    </select>
+    <select id="getLostCountByID" resultType="java.lang.Integer">
+        select count(*) from lost where lostfoundtype_id=#{typeID};
+    </select>
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.xiaolinzi.lostandfound.mapper.UserMapper">
+    <!--    type映射的类型
+-->
+    <resultMap id="userResultMap" type="com.xiaolinzi.lostandfound.model.User">
+        <!--
+            id:完成主键字段的映射
+            result：完成一般字段的映射
+                column：表的列名
+                property:实体类的属性名
+        -->
+        <result column="reg_date" property="regDate"/>
+    </resultMap>
+    <update id="setUpForbidden">
+        update user
+        set
+            <choose>
+                <when test="state == 0">
+                    prestige = 0
+                </when>
+                <otherwise>
+                    prestige = 60
+                </otherwise>
+            </choose>
+        where id = #{userID}
+    </update>
+
+    <select id="login" resultMap="userResultMap">
+        select * from user where (account=#{account} or phone=#{account}) and password=#{password} and prestige <![CDATA[ >= ]]>  60;
+    </select>
+    <select id="getUserByID" resultMap="userResultMap">
+        select * from user where id=#{userID}
+    </select>
+    <select id="getTotalBySearch" resultType="java.lang.Integer">
+        select count(*) from user
+        <where>
+            <if test="user.account != null and user.account != '' ">
+                and account like #{user.account}
+            </if>
+            <if test="user.nickname != null and user.nickname != '' ">
+                and nickname like #{user.nickname}
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                and  phone like #{user.phone}
+            </if>
+            <choose>
+                <when test="state == 0">
+                    and prestige <![CDATA[ < ]]>  60
+                </when>
+                <when test="state == 1">
+                    and prestige <![CDATA[ >= ]]>  60
+                </when>
+                <otherwise>
+                    AND 1 = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+    <select id="getDateBySearch" resultMap="userResultMap">
+        select * from user
+        <where>
+            <if test="user.account != null and user.account != '' ">
+                and account like #{user.account}
+            </if>
+            <if test="user.nickname != null and user.nickname != '' ">
+                and nickname like #{user.nickname}
+            </if>
+            <if test="user.phone != null and user.phone != ''">
+                and  phone like #{user.phone}
+            </if>
+            <choose>
+                <when test="state == 0">
+                    and prestige <![CDATA[ < ]]>  60
+                </when>
+                <when test="state == 1">
+                    and prestige <![CDATA[ >= ]]>  60
+                </when>
+                <otherwise>
+                    AND 1 = 1
+                </otherwise>
+            </choose>
+        </where>
+        limit #{begin} , #{size};
+    </select>
+</mapper>

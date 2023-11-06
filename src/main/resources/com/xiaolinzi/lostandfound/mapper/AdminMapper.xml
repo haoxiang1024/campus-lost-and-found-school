@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.xiaolinzi.lostandfound.mapper.AdminMapper">
+    <!--    type映射的类型
+-->
+    <resultMap id="adminResultMap" type="com.xiaolinzi.lostandfound.model.Admin">
+        <!--
+            id:完成主键字段的映射
+            result：完成一般字段的映射
+                column：表的列名
+                property:实体类的属性名
+        -->
+        <result column="reg_date" property="regDate"/>
+    </resultMap>
+
+    <select id="login" resultMap="adminResultMap">
+        select * from admin where (account=#{account} or phone=#{account}) and password=#{password};
+    </select>
+    <select id="getAll" resultMap="adminResultMap">
+        select * from admin;
+    </select>
+    <select id="getAdminByID" resultMap="adminResultMap">
+        select * from admin where id=#{adminID};
+    </select>
+</mapper>

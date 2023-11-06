@@ -1,0 +1,23 @@
+# TODO 配置数据源相关信息
+
+server:
+  port: 8081
+
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://111.67.203.93:3306/lostandfound?characterEncoding=utf-8&serverTimezone=GMT%2B8 #?serverTimezone=UTC
+    username: root
+    password: Concentrate123
+
+  thymeleaf:
+    prefix:
+      classpath: /templates   # 访问template下的html文件需要配置模板，映射
+    cache: false # 开发时关闭缓存,不然没法看到实时页面
+
+  servlet:
+    multipart: #设置上传文件大小
+      enabled: true
+      max-file-size: 20MB #设置单个文件的大小
+      max-request-size: 20MB #设置单次请求的文件的总大小

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper  namespace="com.xiaolinzi.lostandfound.mapper.LostMapper">
+    <resultMap type="com.xiaolinzi.lostandfound.model.Lost" id="lostResultMap">
+        <result property="id" column="id" />
+        <result property="title" column="title" />
+        <result property="img" column="img" />
+        <result property="pubDate" column="pub_date" />
+        <result property="content" column="content" />
+        <result property="place" column="place" />
+        <result property="phone" column="phone" />
+        <result property="state" column="state" />
+        <result property="stick" column="stick" />
+        <result property="clickCount" column="click_count" />
+        <collection property="lostFoundType"
+                    ofType="com.xiaolinzi.lostandfound.model.LostFoundType">
+            <id property="id" column="type_id" />
+            <result property="name" column="name" />
+        </collection>
+        <collection property="user"
+                    ofType="com.xiaolinzi.lostandfound.model.User">
+            <id property="id" column="user_id" />
+            <result property="account" column="account" />
+            <result property="password" column="password" />
+            <result property="nickname" column="nickname" />
+            <result property="photo" column="photo" />
+            <result property="sex" column="sex" />
+            <result property="phone" column="user_phone" />
+            <result property="balance" column="balance" />
+            <result property="prestige" column="prestige" />
+            <result property="regDate" column="reg_date" />
+        </collection>
+    </resultMap>
+    <delete id="adminDeleteLost">
+        delete from lost where id in
+        <foreach collection="lostIDs" item="lostID" separator="," open="(" close=")">
+            #{lostID}
+        </foreach>
+    </delete>
+    <select id="getStickLost" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+                 left join lostfoundtype l on l.id = lost.lostfoundtype_id
+                 left join user u on u.id = lost.user_id
+        where stick=true and state = '未找到';
+    </select>
+    <select id="selectLostByPage" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+                 left join lostfoundtype l on l.id = lost.lostfoundtype_id
+                 left join user u on u.id = lost.user_id
+        <where>
+            <if test="condition != null">
+                and state=#{condition}
+            </if>
+        </where>
+        limit #{begin} , #{size};
+    </select>
+    <select id="selectTotalCount" resultType="java.lang.Integer">
+        select count(*) from lost
+        <where>
+            <if test="condition != null">
+                and state=#{condition}
+            </if>
+        </where>
+    </select>
+    <select id="selectTotalCountType" resultType="java.lang.Integer">
+        select count(*) from lost
+        <where>
+            <if test="condition != null">
+                and state=#{condition}
+            </if>
+            and lostfoundtype_id=#{typeID}
+        </where>
+    </select>
+    <select id="selectByPageAndType" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+        left join lostfoundtype l on l.id = lost.lostfoundtype_id
+        left join user u on u.id = lost.user_id
+        <where>
+            <if test="condition != null">
+                and state=#{condition}
+            </if>
+            and lostfoundtype_id=#{typeID}
+        </where>
+        limit #{begin} , #{size};
+    </select>
+    <select id="getSelfLost" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+        left join lostfoundtype l on l.id = lost.lostfoundtype_id
+        left join user u on u.id = lost.user_id
+        <where>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+            and lost.user_id=#{userID}
+        </where>
+    </select>
+    <select id="getSelfLostAndType" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+        left join lostfoundtype l on l.id = lost.lostfoundtype_id
+        left join user u on u.id = lost.user_id
+        <where>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+            and lostfoundtype_id=#{typeID}
+            and lost.user_id=#{userID}
+        </where>
+    </select>
+
+    <select id="selectTotalCountSearch" resultType="java.lang.Integer">
+        select count(*) from lost
+        <where>
+            <if test="searchTitle != null and searchTitle != ''">
+                and title like #{searchTitle}
+            </if>
+            <if test="searchPlace != null and searchPlace != ''">
+                and place like #{searchPlace}
+            </if>
+            <if test="typeID != null and typeID != ''">
+                and lostfoundtype_id=#{typeID}
+            </if>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+        </where>
+    </select>
+    <select id="getDateBySearch" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+        left join lostfoundtype l on l.id = lost.lostfoundtype_id
+        left join user u on u.id = lost.user_id
+        <where>
+            <if test="searchTitle != null and searchTitle != ''">
+                and title like #{searchTitle}
+            </if>
+            <if test="searchPlace != null and searchPlace != ''">
+                and place like #{searchPlace}
+            </if>
+            <if test="typeID != null and typeID != ''">
+                and lostfoundtype_id=#{typeID}
+            </if>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+        </where>
+        limit #{begin} , #{size};
+    </select>
+    <select id="getSimilarLost" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+                 left join lostfoundtype l on l.id = lost.lostfoundtype_id
+                 left join user u on u.id = lost.user_id
+        where lost.id!=#{lostID} and lostfoundtype_id=#{typeID} and state='未找到'
+        order by rand() limit 5;
+    </select>
+
+    <select id="getDateTotal" resultType="java.lang.Integer">
+        select count(*) from lost
+        <where>
+            <if test="searchTitle != null and searchTitle != ''">
+                and title like #{searchTitle}
+            </if>
+            <if test="searchPlace != null and searchPlace != ''">
+                and place like #{searchPlace}
+            </if>
+            <if test="typeID != null and typeID != ''">
+                and lostfoundtype_id=#{typeID}
+            </if>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+            <if test="stick == 1">
+                and stick=1
+            </if>
+        </where>
+    </select>
+    <select id="getDate" resultMap="lostResultMap">
+        select *,l.id type_id,u.phone user_phone
+        from lost
+        left join lostfoundtype l on l.id = lost.lostfoundtype_id
+        left join user u on u.id = lost.user_id
+        <where>
+            <if test="searchTitle != null and searchTitle != ''">
+                and title like #{searchTitle}
+            </if>
+            <if test="searchPlace != null and searchPlace != ''">
+                and place like #{searchPlace}
+            </if>
+            <if test="typeID != null and typeID != ''">
+                and lostfoundtype_id=#{typeID}
+            </if>
+            <if test="condition != null and condition != ''">
+                and state=#{condition}
+            </if>
+            <if test="stick == 1">
+                and stick=1
+            </if>
+        </where>
+        <choose>
+            <when test="sort == 'ascending'">
+                order by click_count
+            </when>
+            <when test="sort == 'descending'">
+                order by click_count desc
+            </when>
+            <otherwise>
+                order by lost.id
+            </otherwise>
+        </choose>
+        limit #{begin} , #{size};
+    </select>
+</mapper>

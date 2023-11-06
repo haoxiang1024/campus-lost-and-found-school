@@ -1,0 +1,497 @@
+<template>
+  <div>
+    <!-- 主体部分 -->
+    <el-main>
+      <el-row style="color: aliceblue">
+        <el-col :span="6">
+          <div class="data1">
+            <div class="card_content">
+              <i class="card_list"
+                ><i class="el-icon-s-custom">
+                  <span class="student_sum">学生总人数</span></i
+                >
+              </i>
+              <h3 class="card_list">
+                <i class="el-icon-position"></i>
+                {{ student_total }} Persons
+              </h3>
+              <span class="card_list"
+                >增长比：{{ student_increate }}
+                <i class="el-icon-caret-top" style="color: green"></i>
+                &nbsp;</span
+              >
+              <span class="card_list"
+                >下降比：{{ student_drop }}
+                <i class="el-icon-caret-bottom" style="color: red"></i>
+              </span>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="data2">
+            <div class="card_content">
+              <i class="card_list"
+                ><i class="el-icon-s-custom">
+                  <span class="student_sum">用户总人数</span></i
+                >
+              </i>
+              <h3 class="card_list">
+                <i class="el-icon-position"></i>
+                {{ student_user }} Persons
+              </h3>
+              <span class="card_list"
+                >增长比：{{ student_increate }}
+                <i class="el-icon-caret-top" style="color: green"></i>
+                &nbsp;</span
+              >
+              <span class="card_list"
+                >下降比：{{ student_drop }}
+                <i class="el-icon-caret-bottom" style="color: red"></i>
+              </span>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="data3">
+            <div class="card_content">
+              <i class="card_list"
+                ><i class="el-icon-s-custom">
+                  <span class="student_sum">教师总人数</span></i
+                >
+              </i>
+              <h3 class="card_list">
+                <i class="el-icon-position"></i>
+                {{ teacher_total }} Persons
+              </h3>
+              <span class="card_list"
+                >增长比：{{ student_increate }}
+                <i class="el-icon-caret-top" style="color: green"></i>
+                &nbsp;</span
+              >
+              <span class="card_list"
+                >下降比：{{ student_drop }}
+                <i class="el-icon-caret-bottom" style="color: red"></i>
+              </span>
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="6">
+          <div class="data4">
+            <div class="card_content">
+              <i class="card_list"
+                ><i class="el-icon-s-custom">
+                  <span class="student_sum">学校总人数</span></i
+                >
+              </i>
+              <h3 class="card_list">
+                <i class="el-icon-position"></i>
+                {{ school_sum }} Persons
+              </h3>
+              <span class="card_list"
+                >增长比：{{ student_increate }}
+                <i class="el-icon-caret-top" style="color: green"></i>
+                &nbsp;</span
+              >
+              <span class="card_list"
+                >下降比：{{ student_drop }}
+                <i class="el-icon-caret-bottom" style="color: red"></i>
+              </span>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+      <!-- 折线图 -->
+      <div class="chart">
+        <el-row>
+          <el-col :span="14">
+            <el-card class="box-card" id="box_card">
+              <div slot="header" class="clearfix">
+                <Echarts class="charts" :option="option" />
+              </div>
+            </el-card>
+          </el-col>
+          <!-- tab切换 -->
+          <el-col :span="8" style="padding: 0 0 0 5px">
+            <el-tabs type="border-card">
+              <el-tab-pane label="学生信息">
+                <el-table
+                  :data="tableDate"
+                  style="width: 100%"
+                  max-height="290"
+                >
+                  <el-table-column
+                    prop="user_name"
+                    label="用户名称"
+                    sortable
+                    width="100"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="user_sex"
+                    label="性别"
+                    sortable
+                    width="80"
+                  >
+                    <template slot-scope="scope">
+                      <span> {{ scope.row.user_sex == 1 ? "男" : "女" }} </span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="user_age" label="年龄" width="60">
+                  </el-table-column>
+                  <el-table-column prop="user_date" label="时间" width="110">
+                  </el-table-column>
+                  <el-table-column prop="user_locationMag" label="地址">
+                  </el-table-column>
+                </el-table>
+              </el-tab-pane>
+              <el-tab-pane label="用户信息">
+                <el-table
+                  :data="userDate"
+                  style="width: 100% ,border:1px solid red"
+                  max-height="290"
+                >
+                  <el-table-column
+                    prop="login"
+                    label="名称"
+                    sortable
+                    width="120"
+                  >
+                  </el-table-column>
+                  <el-table-column
+                    prop="score"
+                    label="性别"
+                    sortable
+                    width="110"
+                  >
+                    <template slot-scope="scope">
+                      <span> {{ scope.row.score == 1 ? "男" : "女" }} </span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="html_url" label="个人主页" width="220">
+                  </el-table-column>
+                </el-table>
+              </el-tab-pane>
+              <el-tab-pane label="教师信息">
+                <el-table
+                  :data="teacherDate"
+                  style="width: 100% ,border:1px solid red"
+                  max-height="290"
+                >
+                  <el-table-column
+                    prop="account"
+                    label="教师名称"
+                    sortable
+                    width="100"
+                  >
+                  </el-table-column>
+                  <el-table-column prop="sex" label="性别" sortable width="75">
+                  </el-table-column>
+                  <el-table-column
+                    prop="phone"
+                    label="号码"
+                    sortable
+                    width="110"
+                  >
+                  </el-table-column>
+                  <el-table-column prop="email" label="邮箱" width="170">
+                  </el-table-column>
+                </el-table>
+              </el-tab-pane>
+              <el-tab-pane label="学校人数">
+                <p>请耐心等待，孩子🐏了</p>
+              </el-tab-pane>
+              <el-tab-pane label="备注留言">
+                <div class="infinite-list-wrapper" style="overflow: auto">
+                  <p style="text-align: center; padding: 10px">
+                    &nbsp;&nbsp;&nbsp; 说点什么吧😁
+                  </p>
+                </div>
+
+                <el-input
+                  type="text"
+                  placeholder="输入留言"
+                  v-model="message"
+                ></el-input>
+                <el-button style="margin: 10px 0" @click="submit"
+                  >留言</el-button
+                >
+                <ul v-show="msg" class="ulist"></ul>
+              </el-tab-pane>
+            </el-tabs>
+          </el-col>
+        </el-row>
+      </div>
+    </el-main>
+  </div>
+</template>
+
+<script>
+import { getDate, getUser } from "@/api/student_num";
+import Tags from "./Tags";
+export default {
+  components: { Tags },
+  name: "PageOne",
+  data() {
+    return {
+      msg: false,
+      value: null,
+      message: "",
+      colors: ["#99A9BF", "#F7BA2A", "#FF9900"],
+      student_total: "" || 200,
+      student_user: "",
+      teacher_total: "",
+      school_sum: "",
+      student_increate: "3%",
+      student_drop: "4%",
+      tableDate: [],
+      userDate: [],
+      teacherDate: [],
+      option: {
+        title: {
+          text: "成员信息图",
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "cross",
+            label: {
+              backgroundColor: "#6a7985",
+            },
+          },
+        },
+        legend: {
+          data: ["学生人数", "用户人数", "教师人数", "学院人数"],
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {},
+          },
+        },
+        grid: {
+          left: "3%",
+          right: "4%",
+          bottom: "5%",
+          containLabel: true,
+        },
+        xAxis: [
+          {
+            type: "category",
+            boundaryGap: false,
+            data: ["一月", "二月", "三月", "四月", "五月", "六月", "七月"],
+          },
+        ],
+        yAxis: [
+          {
+            type: "value",
+          },
+        ],
+        series: [
+          {
+            name: "学生人数",
+            type: "line",
+            stack: "Total",
+            areaStyle: {},
+            emphasis: {
+              focus: "series",
+            },
+            data: [120, 132, 101, 134, 90, 230, 210],
+          },
+          {
+            name: "用户人数",
+            type: "line",
+            stack: "Total",
+            areaStyle: {},
+            emphasis: {
+              focus: "series",
+            },
+            data: [220, 182, 191, 234, 290, 330, 310],
+          },
+          {
+            name: "教师人数",
+            type: "line",
+            stack: "Total",
+            areaStyle: {},
+            emphasis: {
+              focus: "series",
+            },
+            data: [150, 232, 201, 154, 190, 330, 410],
+          },
+          {
+            name: "学院人数",
+            type: "line",
+            stack: "Total",
+            areaStyle: {},
+            emphasis: {
+              focus: "series",
+            },
+            data: [320, 332, 301, 334, 390, 330, 320],
+          },
+        ],
+      },
+    };
+  },
+  methods: {
+    StudentToal() {
+      getUser().then(({ data }) => {
+        console.log(data);
+        this.tableDate = data.list;
+        this.student_total = data.count;
+      });
+    },
+    getsum() {
+      this.school_sum = this.student_user + this.teacher_total + this.student_total;
+    },
+    submit() {
+      if (
+        this.message == "" ||
+        this.message.replace(/(^\s*)|(\s*$)/g, "") == ""
+      ) {
+        this.$message("写点啥提交也行呀😉");
+        return;
+      } else {
+        this.msg = true;
+        let date = new Date();
+        let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        let hour = date.getHours();
+        let minute = date.getMinutes();
+        let time =
+          year + "年" + month + "月" + day + "日" + hour + "时" + minute + "分";
+        const ulist = document.querySelector(".ulist");
+        const li = document.createElement("li");
+        li.innerHTML = this.message + '&nbsp'+'&nbsp'+'&nbsp'+'&nbsp'+'&nbsp'+'&nbsp'+ time;
+        ulist.insertBefore(li, ulist.children[0]);
+      }
+    },
+  },
+  mounted() {
+    // 学生总人数
+    this.StudentToal();
+    // 用户信息
+    const user_length = JSON.parse(localStorage.getItem("user"));
+    this.userDate = user_length;
+    this.student_user = user_length.length;
+    // 教师信息
+    const techer_length = JSON.parse(localStorage.getItem("FillTeaList"));
+    this.teacherDate = techer_length;
+    this.teacher_total = techer_length.length;
+    this.getsum();
+  },
+};
+</script>
+
+<style scoped>
+.ulist {
+  list-style: none;
+}
+.el-tabs {
+  width: 498px;
+  height: 399px;
+}
+/* 曲线图 */
+.chart {
+  margin-top: 15px;
+}
+.charts {
+  height: 400px;
+}
+
+#box_card {
+  height: 400px;
+}
+#user_name {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  padding: 0 6px;
+  font-size: 16px;
+  vertical-align: middle;
+}
+/* 设置卡片的形状 */
+.data1,
+.data2,
+.data3,
+.data4 {
+  width: 290px;
+  height: 170px;
+  border-radius: 5px;
+  box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.5);
+}
+/* 设置卡片的颜色 */
+.data1 {
+  background: -webkit-linear-gradient(
+    top right,
+    #b96efc 10%,
+    #756af9 50%,
+    #4d65fb
+  );
+}
+.data2 {
+  background: -webkit-linear-gradient(
+    top right,
+    #6474fd 10%,
+    #5784f9 50%,
+    #3a9ef4
+  );
+}
+.data3 {
+  background: -webkit-linear-gradient(
+    top right,
+    #ed8c57 10%,
+    #eb7c60 50%,
+    #e9616f
+  );
+}
+.data4 {
+  background: -webkit-linear-gradient(
+    top right,
+    #8fdc5c 10%,
+    #7dda67 50%,
+    #3ed28b
+  );
+}
+/* 设置卡片内容 */
+.card_content {
+  padding: 25px 18px;
+}
+.card_list {
+  padding: 30px 0;
+}
+.el-icon-s-custom {
+  font-size: 20px;
+}
+.student_sum {
+  font-size: 16px;
+  color: white;
+  padding: 0 10px;
+}
+/* header */
+.box-card {
+  height: 50px;
+}
+/* main */
+#index {
+  float: right;
+  width: 100%;
+  height: 45px;
+}
+#icon_menu {
+  margin-top: 3px;
+  vertical-align: middle;
+}
+
+.el-main {
+  height: 660px;
+  padding: 15px -1px;
+}
+
+.shouye {
+  font-size: 16px;
+  font-style: normal;
+  padding: 0 0 0 10px;
+  vertical-align: middle;
+}
+.el-button--small {
+  padding: 5px 9px;
+}
+</style>

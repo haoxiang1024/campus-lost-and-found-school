@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失物招领后台管理系统</title>
+    <link rel="stylesheet" href="../element-ui/lib/theme-chalk/index.css">
+    <script src="../js/vue.js"></script>
+    <script src="../element-ui/lib/index.js"></script>
+    <script src="../js/axios-0.18.0.js"></script>
+
+
+    <style>
+        .el-header {
+            background-color: #545c64;
+        }
+
+        .header-img {
+            width: 100px;
+            margin-top: 20px;
+        }
+
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+<div id="app">
+    <div class="top" width="100%" height="auto">
+        <!-- 头部-->
+        <el-header class="el-header">
+            <el-container>
+                <div>
+                    <el-image src="../images/export.png" class="header-img"></el-image>
+                </div>
+<!--                <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal"-->
+                <el-menu default-active="2" class="el-menu-demo" mode="horizontal"
+                         background-color="#545c64" text-color="#fff" active-text-color="#ffd04b"
+                         style="margin-left: auto;">
+                    <el-menu-item index="4" disabled>欢迎您：{{loginAdmin.nickname}}</el-menu-item>
+                    <el-submenu index="1">
+                        <template slot="title">
+                            <el-image style="width: 50px; height: 50px;border-radius: 50%"  :src="'http://111.67.203.93:8081/user/loadPhoto/'+loginAdmin.photo">
+                                <div slot="error" class="image-slot">
+                                    <i class="el-icon-picture-outline"></i>
+                                </div>
+                            </el-image>
+<!--                            更多操作-->
+                        </template>
+<!--                        <el-menu-item index="1-1" @click="">个人详情</el-menu-item>-->
+<!--                        <el-menu-item index="1-1" @click="">修改密码</el-menu-item>-->
+                        <!--                        <el-menu-item index="1-1" @click="userPage">员工</el-menu-item>-->
+                    </el-submenu>
+                    <el-menu-item index="2" @click="goHome">首页</a></el-menu-item>
+                    <el-menu-item index="3" @click="logout"><i class="el-icon-switch-button"
+                                                               style="color: #fff"></i></el-menu-item>
+                </el-menu>
+            </el-container>
+        </el-header>
+
+        <!-- 中间部分 -->
+        <el-container  height="auto">
+            <!-- 侧边栏 -->
+            <div class="left">
+                <el-aside width="200px" style="background-color: rgb(238, 241, 246);">
+                    <!--                    <el-menu :default-openeds="['2']" default-active="1">-->
+                    <el-menu default-active="1">
+                        <el-menu-item index="1" @click="goHome">
+                            <i class="el-icon-menu"></i>
+                            <span slot="title"  @click="goHome">首页</span>
+                        </el-menu-item>
+                        <el-submenu index="2">
+                            <template slot="title"><i class="el-icon-menu"></i>招领管理</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="2-1" @click="goFoundList"><i class="el-icon-help"></i>招领信息</el-menu-item>
+<!--                                <el-menu-item index="2-2" @click="upStudent"><i class="el-icon-help" ></i>学生升级/留级</el-menu-item>-->
+<!--                                <el-menu-item index="2-3" @click="stuWork"><i class="el-icon-help"></i>学生就业情况</el-menu-item>-->
+                            </el-menu-item-group>
+                        </el-submenu>
+
+                        <el-submenu index="3">
+                            <template slot="title"><i class="el-icon-menu"></i>失物管理</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="3-1" @click="goLostList"><i class="el-icon-help"></i>失物信息</el-menu-item>
+<!--                                <el-menu-item index="3-2" @click="upStudent"><i class="el-icon-help"></i>正在研发课程管理</el-menu-item>-->
+<!--                                <el-menu-item index="3-3" @click="upStudent"><i class="el-icon-help"></i>新技术课程管理</el-menu-item>-->
+                            </el-menu-item-group>
+                        </el-submenu>
+                        <el-submenu index="4">
+                            <template slot="title"><i class="el-icon-menu"></i>失物招领类别管理</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="4-1" @click="goTypeList"><i class="el-icon-help"></i>失物招领类别信息</el-menu-item>
+                                <!--                                <el-menu-item index="4-2" @click="upStudent"><i class="el-icon-help"></i>正在研发课程管理</el-menu-item>-->
+                                <!--                                <el-menu-item index="4-3" @click="upStudent"><i class="el-icon-help"></i>新技术课程管理</el-menu-item>-->
+                            </el-menu-item-group>
+                        </el-submenu>
+                        <el-submenu index="5">
+                            <template slot="title"><i class="el-icon-menu"></i>用户管理</template>
+                            <el-menu-item-group>
+                                <el-menu-item index="5-1" @click="goUserList"><i class="el-icon-help"></i>用户信息</el-menu-item>
+<!--                                <el-menu-item index="4-2" @click="upStudent"><i class="el-icon-help"></i>正在研发课程管理</el-menu-item>-->
+<!--                                <el-menu-item index="4-3" @click="upStudent"><i class="el-icon-help"></i>新技术课程管理</el-menu-item>-->
+                            </el-menu-item-group>
+                        </el-submenu>
+                    </el-menu>
+                </el-aside>
+            </div>
+
+            <el-container  height="auto">
+                <!-- 主区域部分 -->
+                <iframe :src="iframeSrc" frameborder="false"
+                        style="top:80px;left: 120px; width: 100%;height:auto"></iframe>
+            </el-container>
+        </el-container>
+    </div>
+</div>
+<!--<script src="../js/firstPage/index.js">-->
+
+</script>
+<script>
+    var vue = new Vue({
+        el: "#app",
+        data: {
+            activeIndex: '2',
+            iframeSrc: "/home",
+            message: '',
+            loginAdmin: {}
+        },
+        created() {
+            // const loginAdmin = 、
+            // console.log(loginAdmin, 'loginAdmin')
+            // if (loginAdmin) {
+            this.loginAdmin = JSON.parse(sessionStorage.getItem("loginAdmin"));
+            // }
+        },
+
+        methods: {
+
+            // findAll: function () {
+            //     this.iframeSrc = "stuList.html"
+            // },
+            // firstPage() {
+            //     this.iframeSrc = "manager.html"
+            //
+            // },
+            goHome(){
+                this.iframeSrc = "/home"
+            },
+            goFoundList() {
+                this.iframeSrc = "/foundList"
+            },
+            goLostList() {
+                this.iframeSrc = "/lostList"
+            },
+            goTypeList() {
+                this.iframeSrc = "/typeList"
+            },
+            goUserList() {
+                this.iframeSrc = "/userList"
+            },
+            logout() {
+
+                this.$confirm("确认退出后端管理吗？","提示",{
+                    type:'info'
+                }).then(()=>{
+                    sessionStorage.removeItem("loginAdmin")
+                    this.$message.success("感谢本次您的使用！");
+                    setTimeout(()=>{
+                        window.location.href="/login"
+                    }, 1000);
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消退出。");
+                });
+                // logoutApi().then(res => {
+                //     if (res.data.code === 1) {
+                //         // localStorage.removeItem('loginAdmin')
+                //         sessionStorage.removeItem("loginAdmin")
+                //         window.location.href = '/login'
+                //     }
+                // })
+            }
+        }
+    });
+</script>
+<style>
+    .left {
+        width: 200px;
+        height:100vh;
+        border-right: 1px solid rgb(230, 230, 230);
+    }
+
+    .el-menu {
+        border: 0 !important;
+    }
+</style>
+</body>
+
+</html>
